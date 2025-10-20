@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +22,7 @@ Future<void> main() async {
       routes: {
         '/login': (context) => const LoginView(),
         '/register': (context) => RegisterView(),
+        '/notes':(context) => NotesView(),
       },
     ),
   );

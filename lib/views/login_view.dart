@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as devtools show log;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -64,24 +65,24 @@ class _LoginViewState extends State<LoginView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential = await FirebaseAuth.instance
+                await FirebaseAuth.instance
                     .signInWithEmailAndPassword(
                       email: email,
                       password: password,
                     );
-                print("✅ Logged in: ${userCredential.user?.email}");
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/notes', (_) => false);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  print(" No user found for that email.");
-                } else if (e.code == 'wrong-password') {
-                  print(" Wrong password provided for that user.");
+                  devtools.log(" No user found for that email.");
                 } else if (e.code == 'invalid-credential') {
-                  print('Invalid credintials(likely captcha)');
+                  devtools.log('Invalid credintials');
                 } else {
-                  print("Firebase Auth error: ${e.code}");
+                  devtools.log("Firebase Auth error: ${e.code}");
                 }
               } catch (e) {
-                print("Unexpected error: $e");
+                devtools.log("Unexpected error: $e");
               }
             },
 
