@@ -14,12 +14,16 @@ class _verifyEmailViewState extends State<verifyEmailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title:const Text('Verify eamil',style: TextStyle(color: Colors.black),),backgroundColor: const Color.fromARGB(67, 4, 137, 174),),
+      appBar: AppBar(title:const Text('Verify email',style: TextStyle(color: Colors.black),),backgroundColor: const Color.fromARGB(67, 4, 137, 174),),
       body: Column(
         children: [
           const Text(
-            "Please verify your email address",
-            style: TextStyle(color: Color.fromARGB(255, 135, 9, 0), fontSize: 30),
+            "Verification email sent, check email to verify",
+            style: TextStyle(color: Color.fromARGB(255, 135, 9, 0), fontSize: 25),
+          ),
+          const Text(
+            "Press the button below to resend verification",
+            style: TextStyle(color: Color.fromARGB(255, 135, 9, 0), fontSize: 25),
           ),
           TextButton(
             onPressed: _emailSent
@@ -39,6 +43,10 @@ class _verifyEmailViewState extends State<verifyEmailView> {
                   },
             child: const Text('Send email verification'),
           ),
+          TextButton(onPressed: () async{
+            await FirebaseAuth.instance.signOut();
+            Navigator.of(context).pushNamedAndRemoveUntil('/register', (route)=>false);
+          }, child: Text('Back to register'))
         ],
       ),
     );

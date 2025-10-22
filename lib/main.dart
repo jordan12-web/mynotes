@@ -24,6 +24,7 @@ Future<void> main() async {
         Loginroute: (context) => const LoginView(),
         Registerroute: (context) => RegisterView(),
         Notesroute:(context) => NotesView(),
+        verifyEmailroute:(context) => verifyEmailView(),
       },
     ),
   );
