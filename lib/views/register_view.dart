@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
-
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/utilities/show_error_snackbar.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -33,17 +32,18 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register',style: TextStyle(color: Colors.black),),
-      backgroundColor: const Color.fromARGB(67, 4, 137, 174),
+      appBar: AppBar(
+        title: const Text('Register', style: TextStyle(color: Colors.black)),
+        backgroundColor: const Color.fromARGB(67, 4, 137, 174),
       ),
       body: Column(
         children: [
           TextField(
             controller: _email,
-      
+
             enableSuggestions: false,
             autocorrect: false,
-      
+
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
               hintText: "Enter your email",
@@ -55,7 +55,7 @@ class _RegisterViewState extends State<RegisterView> {
             enableSuggestions: false,
             autocorrect: false,
             obscureText: true,
-      
+
             decoration: const InputDecoration(
               hintText: "Enter your password",
               hintStyle: TextStyle(fontSize: 20),
@@ -66,34 +66,38 @@ class _RegisterViewState extends State<RegisterView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                await FirebaseAuth.instance
-                    .createUserWithEmailAndPassword(
-                      email: email,
-                      password: password,
-                    );
-                
+                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
-                  devtools.log('Weak password');
+                  showErrorSnackBar(context, 'Weak password');
                 } else if (e.code == 'email-already-in-use') {
-                  devtools.log('Email is already in use');
+                  showErrorSnackBar(context, 'Email is already in use');
                 } else if (e.code == 'invalid-email') {
-                  devtools.log('Invalid email entered');
+                  showErrorSnackBar(context, 'Invalid email entered');
+                } else {
+                  showErrorSnackBar(context, "Error: ${e.code}");
                 }
+              } catch (e) {
+                showErrorSnackBar(context, e.toString());
               }
             },
-      
-            child:const Text(
+
+            child: const Text(
               "Register",
               style: TextStyle(fontSize: 25, color: Colors.black),
             ),
           ),
-          TextButton(onPressed: (){
-            Navigator.of(context).pushNamedAndRemoveUntil(Loginroute, (route)=>false);
-
-          },
-           child:const Text('Already have an account? Login here'))
-
+          TextButton(
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil(Loginroute, (route) => false);
+            },
+            child: const Text('Already have an account? Login here'),
+          ),
         ],
       ),
     );
