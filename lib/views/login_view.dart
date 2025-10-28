@@ -1,7 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/utilities/show_error_snackbar.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -65,14 +67,12 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () async {
               final email = _email.text;
               final password = _password.text;
+             
               try {
-                await FirebaseAuth.instance.signInWithEmailAndPassword(
-                  email: email,
-                  password: password,
-                );
-                final user = FirebaseAuth.instance.currentUser;
+                await AuthService.firebase().login(email: email, password: password);
+                final user = AuthService.firebase().currentUser;
 
-                if (user?.emailVerified ?? false) {
+                if (user?.isEmailVerified ?? false) {
                   Navigator.of(
                     context,
                   ).pushNamedAndRemoveUntil(Notesroute, (_) => false);
@@ -81,17 +81,14 @@ class _LoginViewState extends State<LoginView> {
                     context,
                   ).pushNamedAndRemoveUntil(verifyEmailroute, (_) => false);
                 }
-              } on FirebaseAuthException catch (e) {
-                if (e.code == 'user-not-found') {
-                  showErrorSnackBar(context, 'User not found');
-                } else if (e.code == 'invalid-credential') {
-                  showErrorSnackBar(context, 'Invalid credential');
-                } else {
-                  showErrorSnackBar(context, "Error: ${e.code}");
-                }
-              } catch (e) {
-                showErrorSnackBar(context, e.toString());
+              } on UserNotFoundAuthException {
+                showErrorSnackBar(context, 'User not found');
+              } on InvalidCredentialAuthException{
+                 showErrorSnackBar(context, 'Invalid credential');
+              } on GenericAuthException{
+                showErrorSnackBar(context, 'Authentication Error');
               }
+              
             },
 
             child: Text(
