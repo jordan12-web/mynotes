@@ -12,6 +12,7 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
+  static final bgColor = const Color.fromARGB(67, 0, 100, 128);
   late final NotesServices _notesService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
 
@@ -31,8 +32,14 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Main UI', style: TextStyle(color: Colors.black)),
+        title: const Text('Your Notes', style: TextStyle(color: Colors.black)),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(NewNoteRoute);
+            },
+            icon: const Icon(Icons.add),
+          ),
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
               switch (value) {
@@ -56,30 +63,28 @@ class _NotesViewState extends State<NotesView> {
             },
           ),
         ],
-        backgroundColor: const Color.fromARGB(67, 4, 137, 174),
+        backgroundColor: bgColor,
       ),
       body: FutureBuilder(
         future: _notesService.getOrCreateUser(email: userEmail),
-    
+
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-       case ConnectionState.done:
-           return StreamBuilder(
-             stream: _notesService.allNotes,
-             builder: (BuildContext context, AsyncSnapshot snapshot) {
-               switch (snapshot.connectionState) {
-              
-                 case ConnectionState.waiting:
-                  return const Text('waiting for the notes');
-                 default:
-                 return const LinearProgressIndicator();
-           
-               }
-             },
-           );
-          default: return LinearProgressIndicator();
-          
-        }
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              return StreamBuilder(
+                stream: _notesService.allNotes,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return const Text('waiting for the notes');
+                    default:
+                      return const LinearProgressIndicator();
+                  }
+                },
+              );
+            default:
+              return LinearProgressIndicator();
+          }
         },
       ),
     );
