@@ -12,7 +12,7 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  static final bgColor = const Color.fromARGB(67, 0, 100, 128);
+  static Color get bgColor => const Color.fromARGB(67, 0, 100, 128);
   late final NotesServices _notesService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
 
@@ -76,7 +76,8 @@ class _NotesViewState extends State<NotesView> {
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return const Text('waiting for the notes');
+                    case ConnectionState.active:
+                      return const Text('waiting for the notes.....');
                     default:
                       return const LinearProgressIndicator();
                   }

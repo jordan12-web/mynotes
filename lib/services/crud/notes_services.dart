@@ -117,7 +117,7 @@ final dbUser = await getUser(email: owner.email);
 if(dbUser != owner){
   throw CouldNotFindUser();
 }
-const text = '';
+const text = "";
 
 final noteId = await db.insert(noteTable, {
   userIdColumn: owner.id,
@@ -275,7 +275,7 @@ const idColumn = 'id';
 const emailColumn = 'email';
 const createUserTable = 
             '''CREATE TABLE IF NOT EXISTS "user" (
-              "id"	INTEGER NOT NULL,
+              "id"	INTEGER NOT NULL,          
               "email"	TEXT NOT NULL UNIQUE,
               PRIMARY KEY("id" AUTOINCREMENT)
       ); '''
