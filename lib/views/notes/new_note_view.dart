@@ -22,7 +22,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     super.initState();
   }
 
-  Future<DataBaseNotes> createNote() async {
+  Future<DataBaseNotes> createNewNote() async {
     final existingNote = _note;
     if (existingNote != null) {
       return existingNote;
@@ -30,6 +30,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _notesService.getUser(email: email);
+
     return await _notesService.createNote(owner: owner);
   }
 
@@ -75,7 +76,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     return Scaffold(
       appBar: AppBar(title: const Text('New Note'), backgroundColor: bgColor),
       body: FutureBuilder(
-        future: createNote(),
+        future: createNewNote(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
@@ -89,7 +90,6 @@ class _NewNoteViewState extends State<NewNoteView> {
                   hintText: 'Start typing your note....',
                 ),
               );
-
             default:
               return const CircularProgressIndicator();
           }
