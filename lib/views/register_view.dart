@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/utilities/show_error_snackbar.dart';
+import 'package:mynotes/utilities/dialogs/error_dialog.dart';
+//import 'package:mynotes/utilities/show_error_snackbar.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -74,13 +75,13 @@ class _RegisterViewState extends State<RegisterView> {
                 await AuthService.firebase().sendEmailVerification();
                 Navigator.of(context).pushNamed(verifyEmailroute);
               } on WeakPasswordAuthException {
-                showErrorSnackBar(context, 'Weak password');
+                showErrorDialog(context, 'Weak password');
               } on EmailAlreadyInUseAuthException {
-                showErrorSnackBar(context, 'Email is already in use');
+                showErrorDialog(context, 'Email is already in use');
               } on InvalidEmailAuthException {
-                showErrorSnackBar(context, 'Invalid email entered');
+                showErrorDialog(context, 'Invalid email entered');
               } on GenericAuthException {
-                showErrorSnackBar(context, 'Failed to Register');
+                showErrorDialog(context, 'Failed to Register');
               }
             },
 

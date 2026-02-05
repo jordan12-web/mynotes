@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/utilities/show_error_snackbar.dart';
+import 'package:mynotes/utilities/dialogs/error_dialog.dart';
+//import 'package:mynotes/utilities/show_error_snackbar.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 
 class LoginView extends StatefulWidget {
@@ -82,11 +83,11 @@ class _LoginViewState extends State<LoginView> {
                   ).pushNamedAndRemoveUntil(verifyEmailroute, (_) => false);
                 }
               } on UserNotFoundAuthException {
-                showErrorSnackBar(context, 'User not found');
+                showErrorDialog(context, 'User not found');
               } on InvalidCredentialAuthException{
-                 showErrorSnackBar(context, 'Invalid credential');
+                 showErrorDialog(context, 'Invalid credential');
               } on GenericAuthException{
-                showErrorSnackBar(context, 'Authentication Error');
+                showErrorDialog(context, 'Authentication Error');
               }
               
             },
