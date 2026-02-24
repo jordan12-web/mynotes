@@ -32,13 +32,13 @@ class _NotesViewState extends State<NotesView> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(NewNoteRoute);
+              Navigator.of(context).pushNamed(CreateOrUpdateNote);
             },
             icon: const Icon(Icons.add),
           ),
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
-              switch (value) {
+              switch (value) {        
                 case MenuAction.logout:
                   final shouldLogOut = await showLogoutDialog(context);
                   if (shouldLogOut) {
@@ -75,10 +75,15 @@ class _NotesViewState extends State<NotesView> {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
                         final allNotes = snapshot.data as List<DataBaseNotes>;
-                        return NotesListView(notes: allNotes,
-                       onDeleteNotes: (note) async{
-                        await _notesService.deleteNote(id: note.id);
-                       });
+                        return NotesListView(
+                          notes: allNotes,
+                          onDeleteNotes: (note) async {
+                            await _notesService.deleteNote(id: note.id);
+                          },
+                           onTap: (DataBaseNotes note) {
+                            Navigator.of(context).pushNamed(CreateOrUpdateNote,arguments: note);
+                             },
+                        );
                       } else {
                         return const LinearProgressIndicator();
                       }
@@ -95,5 +100,3 @@ class _NotesViewState extends State<NotesView> {
     );
   }
 }
-
-
