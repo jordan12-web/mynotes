@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:mynotes/extensions/list/filter.dart';
 import 'package:mynotes/services/crud/crud_exceptions.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,7 +9,7 @@ import 'package:path/path.dart' show join;
 
 class NotesServices {
   Database? _db;
-
+  DataBaseUser? _user;
   List<DataBaseNotes> _notes = [];
 
   static final NotesServices _shared = NotesServices._sharedInstance();
@@ -22,14 +23,31 @@ class NotesServices {
   factory NotesServices() => _shared;
 
   late final StreamController<List<DataBaseNotes>> _notesStreamController;
-  Stream<List<DataBaseNotes>> get allNotes => _notesStreamController.stream;
+  Stream<List<DataBaseNotes>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotes();
+        }
+      });
 
-  Future<DataBaseUser> getOrCreateUser({required String email}) async {
+  Future<DataBaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUser {
       final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -51,10 +69,12 @@ class NotesServices {
 
     await getNote(id: note.id);
 
-    final updateCount = await db.update(noteTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
+    final updateCount = await db.update(
+      noteTable,
+      {textColumn: text, isSyncedWithCloudColumn: 0},
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
     if (updateCount == 0) {
       throw CouldNotUpdateNote();
     } else {
