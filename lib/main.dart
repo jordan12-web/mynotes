@@ -23,10 +23,7 @@ Future<void> main() async {
         child: const HomePage(),
       ),
       routes: {
-        Loginroute: (context) => const LoginView(),
-        Registerroute: (context) => const RegisterView(),
-        Notesroute: (context) => const NotesView(),
-        verifyEmailroute: (context) => const verifyEmailView(),
+        
         CreateOrUpdateNote: (context) => const CreateUpdateNoteView(),
       },
     ),
@@ -47,7 +44,10 @@ class HomePage extends StatelessWidget {
           return const verifyEmailView();
         } else if (state is AuthStateLoggedOut) {
           return const LoginView();
-        } else {
+        }else if(state is AuthStateRegistering){
+          return const RegisterView();
+        }
+         else {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );

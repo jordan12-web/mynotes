@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/utilities/show_error_snackbar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_event.dart';
+
 
 class verifyEmailView extends StatefulWidget {
   const verifyEmailView({super.key});
@@ -35,17 +37,13 @@ class _verifyEmailViewState extends State<verifyEmailView> {
           ),
           TextButton(
             onPressed: () async {
-              await AuthService.firebase().sendEmailVerification();
-              showErrorSnackBar(context, 'Verification email sent');
+              context.read<AuthBloc>().add(const AuthEventSendEmailVerification());
             },
             child: const Text('Send email verification'),
           ),
           TextButton(
             onPressed: () async {
-              await AuthService.firebase().logOut();
-              Navigator.of(
-                context,
-              ).pushNamedAndRemoveUntil('/register', (route) => false);
+              context.read<AuthBloc>().add(const AuthEventLogOut());
             },
             child: Text('Back to register'),
           ),
