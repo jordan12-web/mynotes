@@ -118,7 +118,7 @@ class _NewNoteViewState extends State<CreateUpdateNoteView> {
                 ),
               );
             default:
-              return const CircularProgressIndicator();
+              return const LinearProgressIndicator();
           }
         },
       ),
