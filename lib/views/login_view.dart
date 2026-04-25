@@ -5,7 +5,6 @@ import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
-import 'package:mynotes/utilities/dialogs/loading_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -17,7 +16,6 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  
 
   @override
   void initState() {
@@ -37,49 +35,53 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) async{
-         if (state is AuthStateLoggedOut) {
-          
-                  if (state.exception is UserNotFoundAuthException) {
-                    await showErrorDialog(context, 'User not found');
-                  } else if (state.exception
-                      is InvalidCredentialAuthException) {
-                    await showErrorDialog(context, 'Invalid Credential');
-                  } else if (state.exception is GenericAuthException) {
-                    await showErrorDialog(context, 'Authentication Error');
-                  }
-                }
+      listener: (context, state) async {
+        if (state is AuthStateLoggedOut) {
+          if (state.exception is UserNotFoundAuthException) {
+            await showErrorDialog(
+              context,
+              'cannot find the user with the entered credentials!',
+            );
+          } else if (state.exception is InvalidCredentialAuthException) {
+            await showErrorDialog(context, 'Invalid Credential');
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(context, 'Authentication Error');
+          }
+        }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Login'),
           backgroundColor: const Color.fromARGB(67, 4, 137, 174),
         ),
-        body: Column(
-          children: [
-            TextField(
-              controller: _email,
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const Text('Please log into your account in order to interact with and create notes!'),
+              TextField(
+                controller: _email,
 
-              enableSuggestions: false,
-              autocorrect: false,
+                enableSuggestions: false,
+                autocorrect: false,
 
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: "Enter your email",
-                hintStyle: TextStyle(fontSize: 20),
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: "Enter your email",
+                  hintStyle: TextStyle(fontSize: 20),
+                ),
               ),
-            ),
-            TextField(
-              controller: _password,
-              enableSuggestions: false,
-              autocorrect: false,
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: "Enter your password",
-                hintStyle: TextStyle(fontSize: 20),
+              TextField(
+                controller: _password,
+                enableSuggestions: false,
+                autocorrect: false,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: "Enter your password",
+                  hintStyle: TextStyle(fontSize: 20),
+                ),
               ),
-            ),
-            
+
               TextButton(
                 onPressed: () async {
                   final email = _email.text;
@@ -92,15 +94,22 @@ class _LoginViewState extends State<LoginView> {
                   style: TextStyle(fontSize: 25, color: Colors.black),
                 ),
               ),
-            
-            TextButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(const AuthEventShouldRegister(),);
-              
-              },
-              child: const Text("Not registered yet? Register here!"),
-            ),
-          ],
+
+              TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthEventShouldRegister());
+                },
+                child: const Text("Not registered yet? Register here!"),
+              ),
+
+              TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthEventForgotPassword());
+                },
+                child: const Text("Forgot my password"),
+              ),
+            ],
+          ),
         ),
       ),
     );
