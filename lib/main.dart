@@ -13,7 +13,6 @@ import 'package:mynotes/views/notes/notes_view.dart';
 import 'package:mynotes/views/register_view.dart';
 import 'package:mynotes/views/verifyemail__view.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,10 +23,7 @@ Future<void> main() async {
         create: (context) => AuthBloc(FirebaseAuthProvider()),
         child: const HomePage(),
       ),
-      routes: {
-        
-        CreateOrUpdateNote: (context) => const CreateUpdateNoteView(),
-      },
+      routes: {CreateOrUpdateNote: (context) => const CreateUpdateNoteView()},
     ),
   );
 }
@@ -40,9 +36,12 @@ class HomePage extends StatelessWidget {
     context.read<AuthBloc>().add(const AuthEventInitialize());
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        if(state.isLoading){
-          LoadingScreen().show(context: context, text: state.loadingText ?? 'please wait a moment',);
-        }else{
+        if (state.isLoading) {
+          LoadingScreen().show(
+            context: context,
+            text: state.loadingText ?? 'please wait a moment',
+          );
+        } else {
           LoadingScreen().hide();
         }
       },
@@ -53,12 +52,11 @@ class HomePage extends StatelessWidget {
           return const verifyEmailView();
         } else if (state is AuthStateLoggedOut) {
           return const LoginView();
-        }else if(state is AuthStateRegistering){
+        } else if (state is AuthStateRegistering) {
           return const RegisterView();
-        }else if(state is AuthStateForgotPassword){
+        } else if (state is AuthStateForgotPassword) {
           return const ForgotPasswordView();
-        }
-         else {
+        } else {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
