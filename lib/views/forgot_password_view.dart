@@ -5,6 +5,7 @@ import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
 import 'package:mynotes/utilities/dialogs/password_reset_email_sent_dialog.dart';
+import 'package:mynotes/widgets/auth_shell.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -15,6 +16,7 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   late final TextEditingController _controller;
+
   @override
   void initState() {
     super.initState();
@@ -39,46 +41,45 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           if (state.exception != null) {
             await showErrorDialog(
               context,
-              'Unable to process your request, make sure you are a registered user',
+              'We could not send a reset link. Check the email and try again.',
             );
           }
         }
       },
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Forgot password')),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Text(
-                'If you have forgotten your password type the email used in your account and a password reset link will bw sent to you',
+      child: AuthShell(
+        title: 'Reset password',
+        subtitle:
+            'Enter the email for your account and we will send you a reset link.',
+        showBack: true,
+        onBack: () => context.read<AuthBloc>().add(const AuthEventLogOut()),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              controller: _controller,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.mail_outline_rounded),
               ),
-              TextField(
-                keyboardType: TextInputType.emailAddress,
-                autocorrect: false,
-                controller: _controller,
-                decoration: const InputDecoration(
-                  hintText: 'Your email address....',
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  final email = _controller.text;
-                  context.read<AuthBloc>().add(
-                    AuthEventForgotPassword(email: email),
-                  );
-                },
-                child: const Text('Send reset link'),
-              ),
-
-              TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(const AuthEventLogOut());
-                },
-                child: const Text('Back to login page'),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                      AuthEventForgotPassword(email: _controller.text.trim()),
+                    );
+              },
+              child: const Text('Send reset link'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthEventLogOut());
+              },
+              child: const Text('Back to sign in'),
+            ),
+          ],
         ),
       ),
     );

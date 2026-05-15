@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/utilities/dialogs/cannot_share_empty_note_dialog.dart';
-import 'package:mynotes/utilities/generics/get_arguments.dart';
 import 'package:mynotes/services/cloud/cloud_note.dart';
 import 'package:mynotes/services/cloud/firebase_cloud_storage.dart';
+import 'package:mynotes/theme/app_theme.dart';
+import 'package:mynotes/utilities/dialogs/cannot_share_empty_note_dialog.dart';
+import 'package:mynotes/utilities/generics/get_arguments.dart';
 import 'package:share_plus/share_plus.dart';
 
 class CreateUpdateNoteView extends StatefulWidget {
@@ -14,7 +15,6 @@ class CreateUpdateNoteView extends StatefulWidget {
 }
 
 class _NewNoteViewState extends State<CreateUpdateNoteView> {
-  final bgColor = const Color.fromARGB(67, 0, 100, 128);
   CloudNote? _note;
   late final FirebaseCloudStorage _notesService;
   late final TextEditingController _textController;
@@ -39,8 +39,7 @@ class _NewNoteViewState extends State<CreateUpdateNoteView> {
       return existingNote;
     }
     final currentUser = AuthService.firebase().currentUser!;
-    final userId = currentUser.id;
-    final newNote = await _notesService.createNewNote(ownerUserId: userId);
+    final newNote = await _notesService.createNewNote(ownerUserId: currentUser.id);
     _note = newNote;
     return newNote;
   }
@@ -62,11 +61,11 @@ class _NewNoteViewState extends State<CreateUpdateNoteView> {
 
   void _textControllerListener() async {
     final note = _note;
-    if (note == null) {
-      return;
-    }
-    final text = _textController.text;
-    await _notesService.updateNote(documentId: note.documentId, text: text);
+    if (note == null) return;
+    await _notesService.updateNote(
+      documentId: note.documentId,
+      text: _textController.text,
+    );
   }
 
   void _setupTextControllerListener() {
@@ -84,41 +83,61 @@ class _NewNoteViewState extends State<CreateUpdateNoteView> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = context.getArgument<CloudNote>() != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Note'),
+        title: Text(isEditing ? 'Edit note' : 'New note'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
+            tooltip: 'Share',
             onPressed: () async {
               final text = _textController.text;
               if (_note == null || text.isEmpty) {
                 await showCannotShareEmptyNoteDialog(context);
               } else {
-                Share.share(text);
+                await Share.share(text);
               }
             },
-            icon: const Icon(Icons.share),
+            icon: const Icon(Icons.share_rounded),
           ),
         ],
-        backgroundColor: bgColor,
       ),
-
       body: FutureBuilder(
         future: createOrGetExistingNote(context),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               _setupTextControllerListener();
-              return TextField(
-                controller: _textController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                decoration: InputDecoration(
-                  hintText: 'Start typing your note....',
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: TextField(
+                  controller: _textController,
+                  autofocus: true,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  expands: true,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    height: 1.55,
+                    color: AppColors.textPrimary,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'Start writing…',
+                    border: InputBorder.none,
+                    filled: false,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
               );
             default:
-              return const LinearProgressIndicator();
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              );
           }
         },
       ),

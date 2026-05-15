@@ -7,6 +7,7 @@ import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/cloud/cloud_note.dart';
 import 'package:mynotes/services/cloud/firebase_cloud_storage.dart';
+import 'package:mynotes/theme/app_theme.dart';
 import 'package:mynotes/utilities/dialogs/logout_dialog.dart';
 import 'package:mynotes/views/notes/notes_list_view.dart';
 
@@ -18,7 +19,6 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  static Color get bgColor => const Color.fromARGB(67, 0, 100, 128);
   late final FirebaseCloudStorage _notesService;
   String get userId => AuthService.firebase().currentUser!.id;
 
@@ -32,40 +32,41 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Notes', style: TextStyle(color: Colors.black)),
+        title: const Text('My Notes'),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(CreateOrUpdateNote);
-            },
-            icon: const Icon(Icons.add),
-          ),
           PopupMenuButton<MenuAction>(
+            icon: const Icon(Icons.more_vert_rounded),
             onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogOut = await showLogoutDialog(context);
-                  if (shouldLogOut) {
-                    context.read<AuthBloc>().add(AuthEventLogOut());
-                    
-                  }
+              if (value == MenuAction.logout) {
+                final shouldLogOut = await showLogoutDialog(context);
+                if (shouldLogOut && context.mounted) {
+                  context.read<AuthBloc>().add(AuthEventLogOut());
+                }
               }
             },
-            itemBuilder: (context) {
-              return [
-                const PopupMenuItem<MenuAction>(
-                  value: MenuAction.logout,
-                  child: Text("Log out"),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: MenuAction.logout,
+                child: Row(
+                  children: [
+                    Icon(Icons.logout_rounded, size: 20),
+                    SizedBox(width: 12),
+                    Text('Log out'),
+                  ],
                 ),
-              ];
-            },
+              ),
+            ],
           ),
         ],
-        backgroundColor: bgColor,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).pushNamed(CreateOrUpdateNote),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('New note'),
       ),
       body: StreamBuilder(
         stream: _notesService.allNotes(ownerUserId: userId),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
+        builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
             case ConnectionState.active:
@@ -76,17 +77,21 @@ class _NotesViewState extends State<NotesView> {
                   onDeleteNotes: (note) async {
                     await _notesService.deleteNote(documentId: note.documentId);
                   },
-                  onTap: (CloudNote note) {
-                    Navigator.of(
-                      context,
-                    ).pushNamed(CreateOrUpdateNote, arguments: note);
+                  onTap: (note) {
+                    Navigator.of(context).pushNamed(
+                      CreateOrUpdateNote,
+                      arguments: note,
+                    );
                   },
                 );
-              } else {
-                return const LinearProgressIndicator();
               }
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              );
             default:
-              return const LinearProgressIndicator();
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              );
           }
         },
       ),

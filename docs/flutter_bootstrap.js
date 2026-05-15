@@ -41,6 +41,6 @@ _flutter.loader.load({
     hostElement: document.getElementById('flutter_host'),
   },
   serviceWorkerSettings: {
-    serviceWorkerVersion: "2505160397" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
+    serviceWorkerVersion: "2278031818" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
   },
 });

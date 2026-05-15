@@ -18,12 +18,12 @@
 
     <meta charset="UTF-8" />
     <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
-    <meta name="description" content="mynotes - mobile notes app demo" />
+    <meta name="description" content="mynotes - mobile notes app" />
 
-    <!-- Match Flutter logical width to a typical phone (iPhone 14 / 15 class). -->
+    <!-- Tall Android logical viewport (Pixel-class, 20:9) -->
     <meta
       name="viewport"
-      content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=412, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
 
     <meta name="mobile-web-app-capable" content="yes" />
@@ -37,11 +37,11 @@
 
     <style>
       :root {
-        /* Logical mobile viewport (CSS px) — matches Material breakpoints for phones */
-        --mobile-width: 390;
-        --mobile-height: 844;
+        --mobile-width: 412;
+        --mobile-height: 915;
         --phone-scale: 1;
-        --bezel: 14px;
+        --bezel: 10px;
+        --frame-color: #1c1c1e;
       }
 
       * {
@@ -54,73 +54,66 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #e8eaed;
-        font-family:
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
+        background: linear-gradient(160deg, #dfe4ea 0%, #c8d0d9 100%);
       }
 
       body {
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
       }
 
-      .demo-title {
-        position: fixed;
-        top: 12px;
-        left: 0;
-        right: 0;
-        z-index: 100;
-        margin: 0;
-        text-align: center;
-        font-size: 13px;
-        font-weight: 600;
-        color: #555;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        pointer-events: none;
-      }
-
-      /* Scales the entire device chrome to fit the browser window */
-      .phone-stage {
+      .device-stage {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100%;
         height: 100%;
-        padding: 40px 16px 16px;
+        padding: 20px 16px;
       }
 
-      .phone {
+      /* Android-style device chrome */
+      .device {
         position: relative;
         width: calc(var(--mobile-width) * 1px);
         height: calc(var(--mobile-height) * 1px);
         flex: 0 0 auto;
         transform: scale(var(--phone-scale));
         transform-origin: center center;
-        border: var(--bezel) solid #111;
-        border-radius: 48px;
-        background: #111;
+        border: var(--bezel) solid var(--frame-color);
+        border-radius: 28px;
+        background: var(--frame-color);
         box-shadow:
-          0 28px 70px rgba(0, 0, 0, 0.28),
-          inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+          0 32px 80px rgba(0, 0, 0, 0.25),
+          0 0 0 1px rgba(255, 255, 255, 0.06) inset;
       }
 
-      .notch {
+      /* Small punch-hole camera (not a large notch) */
+      .camera-hole {
         position: absolute;
-        top: 0;
+        top: 22px;
         left: 50%;
         z-index: 20;
-        width: 120px;
-        height: 28px;
+        width: 11px;
+        height: 11px;
         transform: translateX(-50%);
-        background: #111;
-        border-radius: 0 0 16px 16px;
+        border-radius: 50%;
+        background: #0a0a0a;
+        box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.15);
+        pointer-events: none;
+      }
+
+      /* Android gesture navigation bar */
+      .gesture-bar {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        z-index: 20;
+        width: 108px;
+        height: 4px;
+        transform: translateX(-50%);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.45);
         pointer-events: none;
       }
 
@@ -128,14 +121,10 @@
         position: absolute;
         inset: 0;
         overflow: hidden;
-        border-radius: 34px;
+        border-radius: 20px;
         background: #042a49;
       }
 
-      /*
-       * Fixed-size host: Flutter measures this element for MediaQuery / layout.
-       * Do not use max-width / max-height here — scale the outer .phone instead.
-       */
       #flutter_host {
         position: absolute;
         top: 0;
@@ -143,7 +132,7 @@
         width: calc(var(--mobile-width) * 1px);
         height: calc(var(--mobile-height) * 1px);
         overflow: hidden;
-        background: #042a49;
+        background: #f4f7f9;
       }
 
       #flutter_host flt-glass-pane,
@@ -156,22 +145,16 @@
         max-height: 100% !important;
       }
 
-      /* Native splash (removed when Flutter calls removeSplashFromWeb) */
       #splash {
         position: absolute;
         inset: 0;
         z-index: 10;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         background-color: #042a49;
         background-image: url("splash/img/light-background.png");
         background-size: cover;
         background-position: center;
         pointer-events: none;
       }
-
     </style>
 
     <script id="splash-screen-script">
@@ -183,15 +166,15 @@
 
     <script>
       (function () {
-        var MOBILE_W = 390;
-        var MOBILE_H = 844;
-        var BEZEL = 14;
+        var MOBILE_W = 412;
+        var MOBILE_H = 915;
+        var BEZEL = 10;
         var outerW = MOBILE_W + BEZEL * 2;
         var outerH = MOBILE_H + BEZEL * 2;
 
         function updatePhoneScale() {
-          var padX = 32;
-          var padY = 56;
+          var padX = 24;
+          var padY = 32;
           var scale = Math.min(
             1,
             (window.innerWidth - padX) / outerW,
@@ -210,17 +193,15 @@
     </script>
   </head>
   <body>
-    <p class="demo-title">mynotes</p>
-
-    <div class="phone-stage">
-      <div class="phone" aria-label="Phone preview">
-        <div class="notch" aria-hidden="true"></div>
+    <div class="device-stage">
+      <div class="device" aria-label="Android phone preview">
+        <div class="camera-hole" aria-hidden="true"></div>
         <div class="screen">
           <div id="flutter_host">
-            <div id="splash" aria-hidden="true">
-            </div>
+            <div id="splash" aria-hidden="true"></div>
           </div>
         </div>
+        <div class="gesture-bar" aria-hidden="true"></div>
       </div>
     </div>
 

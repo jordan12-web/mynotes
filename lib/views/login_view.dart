@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
-import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/widgets/auth_shell.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -21,7 +22,6 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
-
     super.initState();
   }
 
@@ -40,78 +40,72 @@ class _LoginViewState extends State<LoginView> {
           if (state.exception is UserNotFoundAuthException) {
             await showErrorDialog(
               context,
-              'cannot find the user with the entered credentials!',
+              'We could not find an account with those credentials.',
             );
           } else if (state.exception is InvalidCredentialAuthException) {
-            await showErrorDialog(context, 'Invalid Credential');
+            await showErrorDialog(context, 'Invalid email or password.');
           } else if (state.exception is GenericAuthException) {
-            await showErrorDialog(context, 'Authentication Error');
+            await showErrorDialog(context, 'Authentication failed. Try again.');
           }
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Login'),
-          backgroundColor: const Color.fromARGB(67, 4, 137, 174),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Text('Please log into your account in order to interact with and create notes!'),
-              TextField(
-                controller: _email,
-
-                enableSuggestions: false,
-                autocorrect: false,
-
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter your email",
-                  hintStyle: TextStyle(fontSize: 20),
-                ),
+      child: AuthShell(
+        title: 'Welcome back',
+        subtitle: 'Sign in to access your notes from anywhere.',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _email,
+              enableSuggestions: false,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.mail_outline_rounded),
               ),
-              TextField(
-                controller: _password,
-                enableSuggestions: false,
-                autocorrect: false,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: "Enter your password",
-                  hintStyle: TextStyle(fontSize: 20),
-                ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _password,
+              enableSuggestions: false,
+              autocorrect: false,
+              obscureText: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _login(),
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                prefixIcon: Icon(Icons.lock_outline_rounded),
               ),
-
-              TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  context.read<AuthBloc>().add(AuthEventLogIn(email, password));
-                },
-
-                child: Text(
-                  "Login",
-                  style: TextStyle(fontSize: 25, color: Colors.black),
-                ),
-              ),
-
-              TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(const AuthEventShouldRegister());
-                },
-                child: const Text("Not registered yet? Register here!"),
-              ),
-
-              TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(const AuthEventForgotPassword());
-                },
-                child: const Text("Forgot my password"),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: _login,
+              child: const Text('Sign in'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthEventShouldRegister());
+              },
+              child: const Text('Create an account'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthEventForgotPassword());
+              },
+              child: const Text('Forgot password?'),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  void _login() {
+    context.read<AuthBloc>().add(
+          AuthEventLogIn(_email.text.trim(), _password.text),
+        );
   }
 }

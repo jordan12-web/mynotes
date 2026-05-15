@@ -7,6 +7,7 @@ import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/services/auth/firebase_auth_provider.dart';
+import 'package:mynotes/theme/app_theme.dart';
 import 'package:mynotes/views/forgot_password_view.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes/create_update_note_view.dart';
@@ -20,6 +21,8 @@ Future<void> main() async {
   runApp(
     MaterialApp(
       title: 'mynotes',
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(),
       builder: (context, child) {
         if (!kIsWeb) {
           return child ?? const SizedBox.shrink();
@@ -51,7 +54,7 @@ class HomePage extends StatelessWidget {
         if (state.isLoading) {
           LoadingScreen().show(
             context: context,
-            text: state.loadingText ?? 'please wait a moment',
+            text: state.loadingText ?? 'Please wait…',
           );
         } else {
           LoadingScreen().hide();
@@ -70,7 +73,9 @@ class HomePage extends StatelessWidget {
           return const ForgotPasswordView();
         } else {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            ),
           );
         }
       },
