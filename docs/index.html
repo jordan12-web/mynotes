@@ -32,10 +32,7 @@
     <title>mynotes</title>
     <link rel="manifest" href="manifest.json" />
 
-    <meta
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-      name="viewport"
-    />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
     <style id="splash-screen-style">
       html {
@@ -99,6 +96,62 @@
         right: 0;
       }
     </style>
+    <style id="phone-mockup-style">
+      body {
+        margin: 0;
+        padding: 20px;
+        background: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+      }
+      .phone {
+        width: 375px;
+        height: 667px;
+        border: 16px solid #000;
+        border-radius: 36px;
+        background: #000;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+      }
+      .screen {
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      #flutter_target > * {
+        width: 100%;
+        height: 100%;
+      }
+      .notch {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 25px;
+        background: #000;
+        border-radius: 0 0 20px 20px;
+        z-index: 10;
+      }
+      .home-button {
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: #000;
+        border-radius: 50%;
+        z-index: 10;
+      }
+    </style>
     <script id="splash-screen-script">
       function removeSplashFromWeb() {
         document.getElementById("splash")?.remove();
@@ -108,6 +161,38 @@
     </script>
   </head>
   <body>
-    <script src="flutter_bootstrap.js" async=""></script>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen" id="flutter_target">
+        <div id="flutter_placeholder"></div>
+      </div>
+      <div class="home-button"></div>
+    </div>
+    <script>
+      window.addEventListener("load", function () {
+        const screen = document.getElementById("flutter_target");
+
+        const moveFlutterRoot = function () {
+          const root = document.querySelector(
+            "flt-platform-view, flt-glass-pane, flt-canvas, canvas",
+          );
+          if (!root || screen.contains(root)) {
+            return false;
+          }
+          screen.appendChild(root);
+          return true;
+        };
+
+        if (!moveFlutterRoot()) {
+          const observer = new MutationObserver(function (mutations, obs) {
+            if (moveFlutterRoot()) {
+              obs.disconnect();
+            }
+          });
+          observer.observe(document.body, { childList: true, subtree: true });
+        }
+      });
+    </script>
+    <script src="flutter_bootstrap.js" async></script>
   </body>
 </html>
