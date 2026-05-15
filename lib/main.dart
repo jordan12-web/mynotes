@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/constants/routes.dart';
@@ -18,7 +19,18 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      title: 'Flutter Demo',
+      title: 'mynotes',
+      builder: (context, child) {
+        if (!kIsWeb) {
+          return child ?? const SizedBox.shrink();
+        }
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(FirebaseAuthProvider()),
         child: const HomePage(),
