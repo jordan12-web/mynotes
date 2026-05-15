@@ -84,8 +84,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           emit(AuthStateLoggedIn(user: user, isLoading: false));
         }
-      } on Exception catch (e) {
-        emit(AuthStateLoggedOut(exception: e, isLoading: false));
+      } catch (e) {
+        emit(
+          AuthStateLoggedOut(
+            exception: e is Exception ? e : Exception(e.toString()),
+            isLoading: false,
+          ),
+        );
       }
     });
 
